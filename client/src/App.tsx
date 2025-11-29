@@ -9,6 +9,8 @@ interface Icon {
 interface GenerateResponse {
   success: boolean;
   icons: Icon[];
+  partial?: boolean;
+  errors?: Array<{ index: number; error: string }>;
 }
 
 const STYLES = [
@@ -26,6 +28,7 @@ function App() {
   const [icons, setIcons] = useState<Icon[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [warning, setWarning] = useState('');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   // Load theme preference from localStorage on mount
@@ -57,14 +60,36 @@ function App() {
     setBrandColors(newColors);
   };
 
-  const generateIcons = async () => {
+  // Input validation
+  const validateInputs = (): string | null => {
     if (!prompt.trim()) {
-      setError('Please enter a prompt');
+      return 'Please enter a prompt';
+    }
+    if (prompt.length > 200) {
+      return 'Prompt must be less than 200 characters';
+    }
+
+    const filteredColors = brandColors.filter(color => color.trim() !== '');
+    for (const color of filteredColors) {
+      if (!/^#[0-9A-Fa-f]{6}$/.test(color)) {
+        return `Invalid color format: ${color}. Use hex format like #FF5733`;
+      }
+    }
+
+    return null;
+  };
+
+  const generateIcons = async () => {
+    // Validate inputs
+    const validationError = validateInputs();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setLoading(true);
     setError('');
+    setWarning('');
     setIcons([]);
 
     try {
@@ -89,13 +114,31 @@ function App() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate icons');
+
+        // Handle specific error types
+        if (response.status === 400 && errorData.details) {
+          throw new Error(`Validation error: ${errorData.details.join(', ')}`);
+        }
+
+        throw new Error(errorData.error || errorData.details || 'Failed to generate icons');
       }
 
       const data: GenerateResponse = await response.json();
       setIcons(data.icons);
+
+      // Handle partial success
+      if (data.partial) {
+        setWarning(`Successfully generated ${data.icons.length}/4 icons. Some generations failed but we got enough for a set!`);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+
+      // Provide helpful error messages
+      if (errorMessage.includes('NetworkError') || errorMessage.includes('Failed to fetch')) {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -205,6 +248,7 @@ function App() {
           </button>
 
           {error && <div className="error-message">{error}</div>}
+          {warning && <div className="warning-message">{warning}</div>}
         </div>
 
         {loading && (

@@ -263,6 +263,29 @@
   border-left: 4px solid var(--error-color);
 }
 
+/* Dark theme error message */
+[data-theme="dark"] .error-message {
+  background-color: #7f1d1d;
+  color: #fecaca;
+}
+
+/* Warning Message */
+.warning-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #fef3c7;
+  color: #92400e;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  border-left: 4px solid #f59e0b;
+}
+
+/* Dark theme warning message */
+[data-theme="dark"] .warning-message {
+  background-color: #78350f;
+  color: #fde68a;
+}
+
 /* Loading Section */
 .loading-section {
   background: var(--card-background);

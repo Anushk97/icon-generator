@@ -4,11 +4,24 @@ A web application that generates a set of 4 unique icons in a consistent style u
 
 ## Features
 
+### Core Functionality
 - 🎯 Generate 4 unique icons from a single prompt
 - 🎨 5 preset styles: Flat & Minimal, Pastel Dreams, Bubble Style, Neon Glow, 3D Isometric
 - 🌈 Optional brand color customization (HEX codes)
 - 📥 Download individual icons or all at once as PNG files
 - ⚡ Fast generation using FLUX Schnell optimized mode
+
+### Quality & Consistency
+- 🔒 **Seed-based consistency**: Icons in a set share a consistent visual style
+- 🎯 **Negative prompts**: Automatically filters out low-quality elements
+- 🔄 **Automatic retry**: Built-in retry logic with exponential backoff
+- ⚡ **Partial success**: Returns icons even if some fail (minimum 2/4)
+
+### Reliability & UX
+- ✅ **Input validation**: Real-time validation with helpful error messages
+- 🛡️ **Error handling**: Specific error messages for different failure types
+- 📊 **Status feedback**: Clear warnings for partial success scenarios
+- 🌓 **Dark mode**: Full dark/light theme support
 
 ## Prerequisites
 
@@ -123,16 +136,41 @@ Generate 4 unique icons based on the provided parameters.
 }
 ```
 
-**Response:**
+**Response (Success):**
 ```json
 {
   "success": true,
   "icons": [
     {
       "url": "https://...",
-      "prompt": "..."
+      "prompt": "...",
+      "seed": 123456
+    }
+  ],
+  "partial": false
+}
+```
+
+**Response (Partial Success):**
+```json
+{
+  "success": true,
+  "icons": [ /* 2 or 3 icons */ ],
+  "partial": true,
+  "errors": [
+    {
+      "index": 3,
+      "error": "Timeout error"
     }
   ]
+}
+```
+
+**Response (Error):**
+```json
+{
+  "error": "Validation failed",
+  "details": ["Prompt is required and must be a non-empty string"]
 }
 ```
 
@@ -140,12 +178,47 @@ Generate 4 unique icons based on the provided parameters.
 
 Check API health status.
 
+## Testing
+
+Run backend function tests:
+```bash
+node netlify/functions/generate-icons.test.js
+```
+
+Tests cover:
+- Seed generation consistency
+- Input validation logic
+- Error handling scenarios
+
 ## Technology Stack
 
 - **Frontend**: React, TypeScript, CSS
-- **Backend**: Node.js, Express
+- **Backend**: Netlify Functions (serverless)
 - **AI Model**: FLUX Schnell via Replicate API
 - **Image Generation**: 512x512 PNG images
+- **Deployment**: Netlify (auto-deploy from GitHub)
+
+## Deployment
+
+This app is configured for deployment on Netlify:
+
+1. **Push to GitHub**: Code automatically deploys from the main branch
+2. **Environment Variables**: Set `REPLICATE_API_TOKEN` in Netlify dashboard
+3. **Build Settings**: Configured in `netlify.toml`
+   - Base directory: `client`
+   - Build command: `cd .. && npm install && cd client && npm run build`
+   - Publish directory: `client/build`
+   - Functions: `netlify/functions`
+
+### Manual Deployment
+
+```bash
+# Install Netlify CLI
+npm install -g netlify-cli
+
+# Deploy
+netlify deploy --prod
+```
 
 ## Cost Considerations
 
