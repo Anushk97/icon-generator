@@ -1,0 +1,21 @@
+{
+  "name": "icon-generator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "client": "cd client && npm start",
+    "dev:all": "npm run dev & npm run client"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "replicate": "^1.4.0"
+  }
+}
