@@ -182,7 +182,7 @@ Check API health status.
 
 Run backend function tests:
 ```bash
-node netlify/functions/generate-icons.test.js
+node tests/generate-icons.test.js
 ```
 
 Tests cover:
